@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function roomExists(roomId) {
+      return exists(/databases/$(database)/documents/chatrooms/$(roomId));
+    }
+
+    function roomDoc(roomId) {
+      return get(/databases/$(database)/documents/chatrooms/$(roomId));
+    }
+
+    function isRoomAdmin(roomId) {
+      return signedIn()
+        && roomExists(roomId)
+        && roomDoc(roomId).data.adminId == request.auth.uid;
+    }
+
+    match /chatrooms/{roomId} {
+      allow create: if signedIn()
+        && request.resource.data.adminId == request.auth.uid;
+
+      allow read: if signedIn();
+
+      allow update, delete: if isRoomAdmin(roomId);
+
+      match /messages/{messageId} {
+        allow read: if signedIn() && roomExists(roomId);
+
+        allow create: if signedIn()
+          && roomExists(roomId)
+          && request.resource.data.senderId == request.auth.uid;
+
+        allow update: if false;
+
+        allow delete: if isRoomAdmin(roomId)
+          || (signedIn() && resource.data.senderId == request.auth.uid);
+      }
+    }
+  }
+}

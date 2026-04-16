@@ -1,0 +1,32 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function roomExists(roomId) {
+      return firestore.exists(/databases/(default)/documents/chatrooms/$(roomId));
+    }
+
+    function isRoomAdmin(roomId) {
+      return signedIn()
+        && roomExists(roomId)
+        && firestore.get(/databases/(default)/documents/chatrooms/$(roomId)).data.adminId == request.auth.uid;
+    }
+
+    match /chat_files/{roomId}/{fileName} {
+      allow read: if signedIn() && roomExists(roomId);
+      allow create: if signedIn() && roomExists(roomId);
+      allow update: if false;
+      allow delete: if isRoomAdmin(roomId);
+    }
+
+    match /voice/{roomId}/{fileName} {
+      allow read: if signedIn() && roomExists(roomId);
+      allow create: if signedIn() && roomExists(roomId);
+      allow update: if false;
+      allow delete: if isRoomAdmin(roomId);
+    }
+  }
+}

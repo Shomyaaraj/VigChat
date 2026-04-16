@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "55885232503",
+    "project_id": "claprojectmad",
+    "storage_bucket": "claprojectmad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:55885232503:android:7a0c4a16a8b587e3aa4972",
+        "android_client_info": {
+          "package_name": "com.example.claproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGR12yQ9NBcdaeNVCBV21gSip_6qU5dNo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:55885232503:android:42fc373098661b56aa4972",
+        "android_client_info": {
+          "package_name": "com.example.vigchat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGR12yQ9NBcdaeNVCBV21gSip_6qU5dNo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

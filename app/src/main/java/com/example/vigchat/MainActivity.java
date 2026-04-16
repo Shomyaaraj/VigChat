@@ -1,0 +1,89 @@
+package com.example.vigchat;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.EditText;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.example.vigchat.activities.ChatActivity;
+import com.example.vigchat.activities.CreateRoomActivity;
+import com.example.vigchat.activities.QRScannerActivity;
+import com.example.vigchat.data.LocalChatRepository;
+import com.example.vigchat.utils.QRCodeHelper;
+
+public class MainActivity extends AppCompatActivity {
+
+    private EditText joinLinkInput;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        joinLinkInput = findViewById(R.id.joinLinkInput);
+        LocalChatRepository.getOrCreateCurrentUserId(this);
+
+        findViewById(R.id.btnCreateRoom).setOnClickListener(v ->
+                startActivity(new Intent(this, CreateRoomActivity.class))
+        );
+
+        findViewById(R.id.btnJoinRoom).setOnClickListener(v ->
+                startActivity(new Intent(this, QRScannerActivity.class))
+        );
+
+        findViewById(R.id.btnJoinFromLink).setOnClickListener(v -> joinRoomFromInput());
+
+        handleIncomingIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIncomingIntent(intent);
+    }
+
+    private void joinRoomFromInput() {
+        String roomId = QRCodeHelper.extractRoomId(joinLinkInput.getText().toString());
+        if (roomId == null) {
+            joinLinkInput.setError("Paste a valid room link or room ID.");
+            return;
+        }
+        joinLinkInput.setError(null);
+        openChatRoom(roomId);
+    }
+
+    private void handleIncomingIntent(Intent intent) {
+        String roomId = null;
+
+        if (intent.getDataString() != null) {
+            roomId = QRCodeHelper.extractRoomId(intent.getDataString());
+        }
+
+        if (roomId == null && Intent.ACTION_SEND.equals(intent.getAction())) {
+            roomId = QRCodeHelper.extractRoomId(intent.getStringExtra(Intent.EXTRA_TEXT));
+        }
+
+        if (roomId != null) {
+            openChatRoom(roomId);
+        }
+    }
+
+    private void openChatRoom(String roomId) {
+        Intent chatIntent = new Intent(this, ChatActivity.class);
+        chatIntent.putExtra("ROOM_ID", roomId);
+        startActivity(chatIntent);
+    }
+}
